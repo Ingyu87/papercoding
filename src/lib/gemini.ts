@@ -34,7 +34,15 @@ function getGeminiClient() {
     throw new Error("GEMINI_API_KEY가 설정되지 않았습니다.");
   }
 
-  return new GoogleGenAI({ apiKey });
+  return new GoogleGenAI({
+    apiKey,
+    httpOptions: {
+      timeout: 120_000,
+      retryOptions: {
+        attempts: 2,
+      },
+    },
+  });
 }
 
 function stripCodeFence(value: string) {
@@ -51,6 +59,7 @@ function assertCompleteHtml(value: string) {
 
 export async function generatePage(input: GeneratePageInput) {
   const ai = getGeminiClient();
+  const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
   const previousHtml = input.previousHtml?.slice(
     0,
     MAX_PREVIOUS_HTML_LENGTH,
@@ -64,7 +73,7 @@ ${previousHtml}`
     : input.prompt.slice(0, MAX_PROMPT_LENGTH);
 
   const response = await ai.models.generateContent({
-    model: process.env.GEMINI_MODEL || "gemini-2.5-flash",
+    model,
     contents: [
       {
         role: "user",
@@ -82,6 +91,10 @@ ${previousHtml}`
     config: {
       systemInstruction: SYSTEM_INSTRUCTION,
       temperature: 0.7,
+      maxOutputTokens: 32_768,
+      thinkingConfig: model.startsWith("gemini-2.5-")
+        ? { thinkingBudget: 0 }
+        : undefined,
     },
   });
 

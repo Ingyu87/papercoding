@@ -9,7 +9,7 @@ import {
 import { generatePage, type GeneratePageInput } from "@/lib/gemini";
 
 export const runtime = "nodejs";
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 function isGeneratePageInput(value: unknown): value is GeneratePageInput {
   if (!value || typeof value !== "object") return false;
