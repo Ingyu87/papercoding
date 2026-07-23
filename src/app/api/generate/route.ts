@@ -46,12 +46,12 @@ export async function POST(request: Request) {
       );
     }
 
-    const html = await generatePage({
+    const result = await generatePage({
       ...body,
       prompt: body.prompt.trim(),
     });
 
-    return NextResponse.json({ html });
+    return NextResponse.json(result);
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "페이지 생성에 실패했습니다.";

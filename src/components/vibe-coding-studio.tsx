@@ -176,15 +176,17 @@ export function VibeCodingStudio() {
       });
       const result = (await response.json()) as {
         html?: string;
+        message?: string;
         error?: string;
       };
 
-      if (!response.ok || !result.html) {
+      if (!response.ok || !result.html || !result.message) {
         throw new Error(result.error || "페이지 생성에 실패했습니다.");
       }
 
       if (controller.signal.aborted) return;
 
+      const resultMessage = result.message;
       setCurrentHtml(result.html);
       if (isEditRequest) {
         setEditCount((current) =>
@@ -198,9 +200,9 @@ export function VibeCodingStudio() {
           role: "model",
           text: isEditRequest
             ? editCount + 1 >= MAX_CHAT_EDITS
-              ? "수정했어! 오른쪽에서 확인해 봐. 이번 작품의 수정 채팅 10회를 모두 사용했어. 새 작품은 초기화 후 시작할 수 있어. ✨"
-              : `수정했어! 오른쪽 미리보기에서 확인해 봐. 수정 기회는 ${MAX_CHAT_EDITS - editCount - 1}회 남았어. ✨`
-            : "완성했어! 오른쪽 미리보기에서 직접 눌러 보고 움직여 봐. ✨",
+              ? `${resultMessage} 이번 작품의 수정 채팅 10회를 모두 사용했어. 새 작품은 초기화 후 시작할 수 있어.`
+              : `${resultMessage} 수정 기회는 ${MAX_CHAT_EDITS - editCount - 1}회 남았어.`
+            : resultMessage,
         },
       ]);
       showToast("새 페이지가 완성됐어요.", "success");
