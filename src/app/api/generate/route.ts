@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import {
   ACCEPTED_IMAGE_TYPES,
+  GENERATION_CUTOFF_AT,
   MAX_IMAGE_BYTES,
   MAX_PREVIOUS_HTML_LENGTH,
   MAX_PROMPT_LENGTH,
@@ -36,6 +37,19 @@ function isGeneratePageInput(value: unknown): value is GeneratePageInput {
 }
 
 export async function POST(request: Request) {
+  if (Date.now() >= GENERATION_CUTOFF_AT) {
+    return NextResponse.json(
+      {
+        error:
+          "AI 생성 운영이 2026년 7월 26일 0시에 종료되었습니다.",
+      },
+      {
+        status: 410,
+        headers: { "Cache-Control": "no-store" },
+      },
+    );
+  }
+
   try {
     const body: unknown = await request.json();
 
