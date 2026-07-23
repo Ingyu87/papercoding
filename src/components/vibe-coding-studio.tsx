@@ -58,6 +58,8 @@ const INITIAL_MESSAGE: ChatMessage = {
 const DEFAULT_PROMPT =
   "도화지 속 PRD는 기능 요구사항으로 해석하고, 그림은 UI 설계로 참고해서 실제로 사용할 수 있는 웹앱으로 구현해 줘. 도화지 자체를 화면에 옮기지는 마.";
 
+const MAX_CHAT_EDITS = 10;
+
 function fileToDataUrl(file: File) {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -76,6 +78,7 @@ export function VibeCodingStudio() {
   const [prompt, setPrompt] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_MESSAGE]);
   const [currentHtml, setCurrentHtml] = useState("");
+  const [editCount, setEditCount] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -138,6 +141,12 @@ export function VibeCodingStudio() {
     const cleanPrompt = prompt.trim();
     if (!image || !cleanPrompt || isGenerating) return;
 
+    const isEditRequest = Boolean(currentHtml);
+    if (isEditRequest && editCount >= MAX_CHAT_EDITS) {
+      showToast("수정 채팅 10회를 모두 사용했어요.", "error");
+      return;
+    }
+
     const userMessage: ChatMessage = {
       id: createId(),
       role: "user",
@@ -177,13 +186,20 @@ export function VibeCodingStudio() {
       if (controller.signal.aborted) return;
 
       setCurrentHtml(result.html);
+      if (isEditRequest) {
+        setEditCount((current) =>
+          Math.min(current + 1, MAX_CHAT_EDITS),
+        );
+      }
       setMessages((current) => [
         ...current,
         {
           id: createId(),
           role: "model",
-          text: currentHtml
-            ? "수정했어! 오른쪽 미리보기에서 달라진 모습을 확인해 봐. ✨"
+          text: isEditRequest
+            ? editCount + 1 >= MAX_CHAT_EDITS
+              ? "수정했어! 오른쪽에서 확인해 봐. 이번 작품의 수정 채팅 10회를 모두 사용했어. 새 작품은 초기화 후 시작할 수 있어. ✨"
+              : `수정했어! 오른쪽 미리보기에서 확인해 봐. 수정 기회는 ${MAX_CHAT_EDITS - editCount - 1}회 남았어. ✨`
             : "완성했어! 오른쪽 미리보기에서 직접 눌러 보고 움직여 봐. ✨",
         },
       ]);
@@ -235,6 +251,7 @@ export function VibeCodingStudio() {
     setPrompt("");
     setMessages([INITIAL_MESSAGE]);
     setCurrentHtml("");
+    setEditCount(0);
     setIsGenerating(false);
     showToast("새 도화지를 준비했어요.", "success");
   }
@@ -329,9 +346,17 @@ export function VibeCodingStudio() {
               <span className="step step-purple">02</span>
               <div>
                 <h2>AI와 수정하기</h2>
-                <p>완성 후 원하는 부분을 계속 바꿔 보세요</p>
+                <p>완성 후 원하는 부분을 최대 10회 바꿔 보세요</p>
               </div>
-              <MessageSquare size={20} />
+              <span
+                className={`edit-counter ${
+                  editCount >= MAX_CHAT_EDITS ? "is-complete" : ""
+                }`}
+                aria-label={`수정 채팅 ${editCount}/${MAX_CHAT_EDITS}회 사용`}
+              >
+                <MessageSquare size={13} />
+                {editCount}/{MAX_CHAT_EDITS}
+              </span>
             </div>
 
             <div className="chat-history" aria-live="polite">
@@ -377,18 +402,29 @@ export function VibeCodingStudio() {
                 }}
                 maxLength={MAX_PROMPT_LENGTH}
                 placeholder={
-                  image
+                  currentHtml && editCount >= MAX_CHAT_EDITS
+                    ? "수정 채팅 10회를 모두 사용했어요"
+                    : image
                     ? "예: 버튼을 더 크게 하고 성공 효과음을 넣어 줘"
                     : "먼저 PRD와 디자인 이미지를 올려 주세요"
                 }
-                disabled={!image || isGenerating}
+                disabled={
+                  !image ||
+                  isGenerating ||
+                  (Boolean(currentHtml) && editCount >= MAX_CHAT_EDITS)
+                }
                 rows={2}
                 aria-label="AI에게 보낼 요청"
               />
               <button
                 className="send-button"
                 type="submit"
-                disabled={!image || !prompt.trim() || isGenerating}
+                disabled={
+                  !image ||
+                  !prompt.trim() ||
+                  isGenerating ||
+                  (Boolean(currentHtml) && editCount >= MAX_CHAT_EDITS)
+                }
                 aria-label="요청 보내기"
               >
                 <Send size={18} />
