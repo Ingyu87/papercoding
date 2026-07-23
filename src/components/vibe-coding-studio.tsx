@@ -52,10 +52,11 @@ type Toast = {
 const INITIAL_MESSAGE: ChatMessage = {
   id: "welcome",
   role: "model",
-  text: "안녕! 손으로 그린 멋진 아이디어를 사진으로 보여 줘. 움직이는 웹 페이지로 만들어 줄게! 🎨",
+  text: "도화지에 쓴 PRD와 화면 디자인을 보여 줘. 기획은 기능으로, 스케치는 실제 UI로 구현할게. 완성 뒤에는 여기서 계속 수정할 수 있어! 🎨",
 };
 
-const DEFAULT_PROMPT = "이 그림을 보고 재미있게 움직이는 웹 페이지로 만들어 줘!";
+const DEFAULT_PROMPT =
+  "도화지 속 PRD는 기능 요구사항으로 해석하고, 그림은 UI 설계로 참고해서 실제로 사용할 수 있는 웹앱으로 구현해 줘. 도화지 자체를 화면에 옮기지는 마.";
 
 function fileToDataUrl(file: File) {
   return new Promise<string>((resolve, reject) => {
@@ -273,17 +274,17 @@ export function VibeCodingStudio() {
           <div className="intro">
             <span className="eyebrow">
               <Sparkles size={14} />
-              상상을 웹으로
+              PRD와 디자인을 웹앱으로
             </span>
-            <h1>그림 한 장이면<br />시작할 수 있어요.</h1>
-            <p>손그림을 올리고, 만들고 싶은 움직임을 AI에게 이야기해 보세요.</p>
+            <h1>도화지 한 장이<br />진짜 웹앱이 됩니다.</h1>
+            <p>직접 쓴 PRD와 화면 디자인을 올리고, 완성된 앱을 대화로 계속 수정해 보세요.</p>
           </div>
 
           <section className="panel upload-panel">
             <div className="panel-heading">
               <span className="step">01</span>
               <div>
-                <h2>스케치 올리기</h2>
+                <h2>PRD·디자인 올리기</h2>
                 <p>PNG, JPG, WEBP · 최대 3MB</p>
               </div>
               <ImageIcon size={20} />
@@ -293,7 +294,7 @@ export function VibeCodingStudio() {
               className={`upload-zone ${image ? "has-image" : ""}`}
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              aria-label={image ? "다른 이미지 선택" : "스케치 이미지 선택"}
+              aria-label={image ? "다른 이미지 선택" : "PRD와 디자인 이미지 선택"}
             >
               <input
                 ref={fileInputRef}
@@ -305,7 +306,7 @@ export function VibeCodingStudio() {
               {image ? (
                 <>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={image.previewUrl} alt="업로드한 스케치 미리보기" />
+                  <img src={image.previewUrl} alt="업로드한 PRD와 디자인 미리보기" />
                   <span className="replace-image">
                     <RefreshCw size={14} />
                     다른 그림
@@ -316,8 +317,8 @@ export function VibeCodingStudio() {
                   <span className="upload-icon">
                     <UploadCloud size={27} />
                   </span>
-                  <strong>그림을 여기에 올려 주세요</strong>
-                  <small>클릭해서 이미지 선택</small>
+                  <strong>PRD와 화면 디자인을 올려 주세요</strong>
+                  <small>한 장에 함께 그려도 좋아요</small>
                 </span>
               )}
             </button>
@@ -327,8 +328,8 @@ export function VibeCodingStudio() {
             <div className="panel-heading">
               <span className="step step-purple">02</span>
               <div>
-                <h2>AI와 만들기</h2>
-                <p>원하는 모습을 자유롭게 말해 보세요</p>
+                <h2>AI와 수정하기</h2>
+                <p>완성 후 원하는 부분을 계속 바꿔 보세요</p>
               </div>
               <MessageSquare size={20} />
             </div>
@@ -377,8 +378,8 @@ export function VibeCodingStudio() {
                 maxLength={MAX_PROMPT_LENGTH}
                 placeholder={
                   image
-                    ? "예: 버튼을 누르면 별이 반짝이게 해 줘"
-                    : "먼저 스케치 이미지를 올려 주세요"
+                    ? "예: 버튼을 더 크게 하고 성공 효과음을 넣어 줘"
+                    : "먼저 PRD와 디자인 이미지를 올려 주세요"
                 }
                 disabled={!image || isGenerating}
                 rows={2}
@@ -448,9 +449,11 @@ export function VibeCodingStudio() {
                   <Sparkles size={28} />
                 </span>
                 <strong>
-                  {currentHtml ? "페이지를 고치는 중..." : "상상을 코딩하는 중..."}
+                  {currentHtml
+                    ? "요청한 부분을 수정하는 중..."
+                    : "PRD를 읽고 웹앱을 설계하는 중..."}
                 </strong>
-                <p>잠시만 기다려 주세요. 멋진 페이지가 곧 완성돼요!</p>
+                <p>기획과 디자인을 구분해 실제 동작으로 구현하고 있어요.</p>
               </div>
             )}
           </div>
