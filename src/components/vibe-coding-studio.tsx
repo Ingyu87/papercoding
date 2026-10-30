@@ -502,7 +502,7 @@ export function VibeCodingStudio() {
         <span>© 2026 도화지 바이브 코딩</span>
         <span className="footer-note">
           <LockKeyhole size={12} />
-          Gemini API 키는 서버에서 안전하게 보호됩니다
+          OpenAI API 키는 서버에서 안전하게 보호됩니다
         </span>
       </footer>
 
