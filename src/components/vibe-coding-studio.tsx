@@ -1,5 +1,7 @@
 "use client";
 
+import { LegalDialogs } from "@/components/legal-dialogs";
+
 import {
   Bot,
   Download,
@@ -500,6 +502,7 @@ export function VibeCodingStudio() {
 
       <footer>
         <span>© 2026 도화지 바이브 코딩</span>
+        <LegalDialogs />
         <span className="footer-note">
           <LockKeyhole size={12} />
           OpenAI API 키는 서버에서 안전하게 보호됩니다
